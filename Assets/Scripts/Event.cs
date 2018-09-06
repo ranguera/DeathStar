@@ -7,6 +7,7 @@ using System;
 public class Event
 { 
     public int evento;
+    public int ID;
     public int[] sensor;
     public int[] charge;
 }
