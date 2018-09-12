@@ -39,7 +39,7 @@ namespace DeathStar
 
             for (int i = 0; i < sc.x.Length; i++)
             {
-                GameObject go = (GameObject) Instantiate(this.sensor, new Vector3(sc.x[i]/ this.scaleFactor, sc.y[i]/ this.scaleFactor, sc.z[i]/ this.scaleFactor), Quaternion.identity);
+                GameObject go = (GameObject) Instantiate(this.sensor, new Vector3(sc.x[i]/ this.scaleFactor, sc.z[i]/ this.scaleFactor, sc.y[i]/ this.scaleFactor), Quaternion.identity);
                 go.transform.parent = this.parent.transform;
                 renderers.Add(go.GetComponent<Renderer>());
             }
@@ -53,7 +53,7 @@ namespace DeathStar
             List<int> charges = new List<int>();
             for (int i = 0; i < evs.events.Length; i++)
             {
-                yield return new WaitForSeconds(Random.Range(.5f, .51f));
+                yield return new WaitForSeconds(.8f);
                 ids.Clear();
                 charges.Clear();
                 eventnum.text = evs.events[i].evento.ToString();
@@ -72,24 +72,42 @@ namespace DeathStar
         private IEnumerator Flash(List<int> ids, List<int> charges)
         {
             MaterialPropertyBlock props = new MaterialPropertyBlock();
+            Color[] flashcolors = new Color[ids.Count];
             float t = Time.time;
 
             for (int i = 0; i < ids.Count; i++)
             {
                 //props.SetColor("_Color", new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f)));
-                props.SetColor("_Color", heatmap.GetPixel(charges[i],0));
+                props.SetColor("_Color", flashcolors[i] = heatmap.GetPixel(charges[i],0));
+                //flashcolors[i] = props;
                 if(ids[i] < this.renderers.Count)
                     this.renderers[ids[i]].SetPropertyBlock(props);
             }
 
-            yield return new WaitForSeconds(.4f);
+            yield return new WaitForSeconds(.2f);
+            while( Time.time < t+.5f )
+            { 
+                //t += Time.deltaTime;
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    if (ids[i] < this.renderers.Count)
+                    {
+                        props.SetColor("_Color", Color.Lerp(flashcolors[i], this.colorOFF, (Time.time-t) * 2f));
+                        this.renderers[ids[i]].SetPropertyBlock(props);
+                    }
+                }
 
+                yield return null;
+            }
+
+            /*yield return new WaitForSeconds(.4f);
+            
             for (int i = 0; i < ids.Count; i++)
             {
                 props.SetColor("_Color", this.colorOFF);
                 if (ids[i] < this.renderers.Count)
                     this.renderers[ids[i]].SetPropertyBlock(props);
-            }
+            }*/
         }
     }
 }
